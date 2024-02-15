@@ -22,6 +22,7 @@ import {DIDManager, AbstractIdentifierProvider} from '@veramo/did-manager';
 import {EthrDIDProvider} from '@veramo/did-provider-ethr';
 import {getDidIonResolver, IonDIDProvider} from '@veramo/did-provider-ion';
 import {getDidKeyResolver, KeyDIDProvider} from '@veramo/did-provider-key';
+import {getDidOydResolver, OydDIDProvider} from '@ownyourdata/did-provider-oyd';
 import {DIDResolverPlugin} from '@veramo/did-resolver';
 import {SecretBox} from '@veramo/kms-local';
 import {OrPromise} from '@veramo/utils';
@@ -43,6 +44,7 @@ export const didResolver: Resolver = new Resolver({
   ...webDIDResolver(),
   ...getDidIonResolver(),
   ...getDidJwkResolver(),
+  ...getDidOydResolver(),
 });
 
 export const didMethodsSupported: Array<string> = Object.keys(didResolver['registry']).map((method: string) =>
@@ -63,6 +65,9 @@ export const didProviders: Record<string, AbstractIdentifierProvider> = {
   [`${DID_PREFIX}:${SupportedDidMethodEnum.DID_JWK}`]: new JwkDIDProvider({
     defaultKms: KeyManagementSystemEnum.LOCAL,
   }),
+  [`${DID_PREFIX}:${SupportedDidMethodEnum.DID_OYD}`]: new OydDIDProvider({
+    defaultKms: KeyManagementSystemEnum.LOCAL,
+  }),
 };
 
 const dbConnection: OrPromise<DataSource> = getDbConnection(DB_CONNECTION_NAME);
@@ -79,7 +84,7 @@ const agentPlugins: Array<IAgentPlugin> = [
   }),
   new DIDManager({
     store: new DIDStore(dbConnection),
-    defaultProvider: `${DID_PREFIX}:${SupportedDidMethodEnum.DID_KEY}`,
+    defaultProvider: `${DID_PREFIX}:${SupportedDidMethodEnum.DID_OYD}`,
     providers: didProviders,
   }),
   new DIDResolverPlugin({
